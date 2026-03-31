@@ -328,15 +328,11 @@ uint16_t FRAM::_getMetaData(uint8_t field)
 
 void FRAM::_writeBlock(uint16_t memaddr, uint8_t * obj, uint8_t size)
 {
-  i2c::WriteBuffer buff[2];
-  uint8_t maddr[] = { (uint8_t)(memaddr >> 8), (uint8_t)(memaddr & 0xFF) };
-
-  buff[0].data = maddr;
-  buff[0].len = 2;
-  buff[1].data = obj;
-  buff[1].len = size;
-
-  this->bus_->writev(this->address_, buff, 2, true);
+  std::vector<uint8_t> packet;
+  packet.push_back((uint8_t)(memaddr >> 8));
+  packet.push_back((uint8_t)(memaddr & 0xFF));
+  packet.insert(packet.end(), obj, obj + size);
+  this->bus_->write(this->address_, packet.data(), packet.size(), true);
 }
 
 
@@ -523,16 +519,12 @@ void FRAM32::_writeBlock(uint32_t memaddr, uint8_t * obj, uint8_t size)
 {
   uint8_t _addr = this->address_;
   if (memaddr & 0x00010000) _addr += 0x01;
-  
-  i2c::WriteBuffer buff[2];
-  uint8_t maddr[] = { (uint8_t)(memaddr >> 8), (uint8_t)(memaddr & 0xFF) };
 
-  buff[0].data = maddr;
-  buff[0].len = 2;
-  buff[1].data = obj;
-  buff[1].len = size;
-
-  this->bus_->writev(_addr, buff, 2, true);
+  std::vector<uint8_t> packet;
+  packet.push_back((uint8_t)(memaddr >> 8));
+  packet.push_back((uint8_t)(memaddr & 0xFF));
+  packet.insert(packet.end(), obj, obj + size);
+  this->bus_->write(_addr, packet.data(), packet.size(), true);
 }
 
 
@@ -561,16 +553,12 @@ void FRAM11::_writeBlock(uint16_t memaddr, uint8_t * obj, uint8_t size)
 {
   // Device uses Address Pages
   uint8_t DeviceAddrWithPageBits = this->address_ | ((memaddr & 0x0700) >> 8);
-
-  i2c::WriteBuffer buff[2];
   uint8_t maddr = memaddr & 0xFF;
 
-  buff[0].data = &maddr;
-  buff[0].len = 1;
-  buff[1].data = obj;
-  buff[1].len = size;
-
-  this->bus_->writev(DeviceAddrWithPageBits, buff, 2, true);
+  std::vector<uint8_t> packet;
+  packet.push_back(maddr);
+  packet.insert(packet.end(), obj, obj + size);
+  this->bus_->write(DeviceAddrWithPageBits, packet.data(), packet.size(), true);
 }
 
 
@@ -599,16 +587,12 @@ void FRAM9::_writeBlock(uint16_t memaddr, uint8_t * obj, uint8_t size)
 {
   // Device uses Address Pages
   uint8_t DeviceAddrWithPageBits = this->address_ | ((memaddr & 0x0100) >> 8);
-
-  i2c::WriteBuffer buff[2];
   uint8_t maddr = memaddr & 0xFF;
 
-  buff[0].data = &maddr;
-  buff[0].len = 1;
-  buff[1].data = obj;
-  buff[1].len = size;
-
-  this->bus_->writev(DeviceAddrWithPageBits, buff, 2, true);
+  std::vector<uint8_t> packet;
+  packet.push_back(maddr);
+  packet.insert(packet.end(), obj, obj + size);
+  this->bus_->write(DeviceAddrWithPageBits, packet.data(), packet.size(), true);
 }
 
 
