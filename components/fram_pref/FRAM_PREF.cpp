@@ -118,7 +118,9 @@ void FRAM_PREF::setup() {
   this->prefs_static_cb_.clear();
   
   if (this->pool_size_) {
-    uint32_t hash = fnv1_hash(App.get_compilation_time());
+    char build_time[26];
+    App.get_build_time_string(build_time);
+    uint32_t hash = fnv1_hash(std::string(build_time));
     
     if (hash != this->fram_->read32(this->pool_start_)) {
       this->_clear();
